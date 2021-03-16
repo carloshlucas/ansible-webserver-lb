@@ -1,0 +1,9 @@
+[webservers]
+chlabwebserver01 ansible_host=192.168.15.244
+chlabwebserver02 ansible_host=192.168.15.245
+
+[loadbalancers]
+chlabwebsrvr-lb01 ansible_host=192.168.15.246
+
+[local]
+control ansible_connection=local

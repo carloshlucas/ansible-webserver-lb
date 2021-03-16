@@ -1,0 +1,4 @@
+# all-laybook.yml
+---
+  - import_playbook: setup-app.yml
+  - import_playbook: setup-lb.yml

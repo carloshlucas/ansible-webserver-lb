@@ -1,0 +1,55 @@
+---
+# tasks file for roles/webservers
+
+- name: Ping all servers
+  action: ping
+  tags: ping
+
+- name: Updating apt packages
+  apt: name=* state=latest update_cache=yes force_apt_get=yes
+  tags: apt-update
+
+- name: DPKG Ubuntu Package
+  command: "dpkg --configure -a"
+  tags: dpkg
+  
+- name: Installing services
+  apt:
+    name:
+      - apache2
+      - php
+    state: present
+  tags: install services
+
+- name: Upload application file
+  copy:
+    src: ./index.php
+    dest: "{{ path_to_app }}"
+    mode: 0755
+
+- name: Create simple info page
+  copy:
+    dest: "{{ path_to_app }}/info.php"
+    content: "<h1> Info about our webserver {{ ansible_hostname }} </h1>"
+
+- name: Configure php.ini file
+  lineinfile:
+    path: /etc/php/7.2/apache2/php.ini
+    regexp: ^short_open_tag
+    line: 'short_open_tag=On'
+  notify: restart apache
+
+# Rename index HTML File
+- name: File Check
+  stat: path=/var/www/html
+  register: index
+  ignore_errors: yes
+  tags: file
+
+- name: Move index.html to index.bkp
+  command: mv /var/www/html/index.html /var/www/html/index.bkp
+  when: index.stat.exists
+  ignore_errors: yes
+  
+- name: Ensure apache starts
+  service: name=apache2 state=started enabled=yes
